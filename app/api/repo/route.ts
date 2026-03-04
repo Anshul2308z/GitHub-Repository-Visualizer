@@ -19,7 +19,7 @@ export async function GET(req: Request) {
 
     try {
         const githubRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=100`);
-        
+
         const data= await githubRes.json();
 
         if(!githubRes.ok) {
@@ -28,7 +28,26 @@ export async function GET(req: Request) {
                 { status: githubRes.status });
             }
 
-        return Response.json({ raw: data });
+        type RawCommit = {
+        commit: {
+            author: {
+            date: string
+            }
+            message: string
+        }
+        author: {
+            login: string
+        } | null
+        }
+
+        const commits = (data as RawCommit[]).map((c) => ({
+        date: c.commit.author.date,
+        author: c.author?.login || "unknown",
+        message: c.commit.message,
+        }))
+
+
+        return Response.json({ commits });
 
     } catch (error) {
         return Response.json(
