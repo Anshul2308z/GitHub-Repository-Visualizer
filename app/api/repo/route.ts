@@ -1,43 +1,74 @@
+type RawCommit = {
+commit: {
+    author: {
+    date: string
+    }
+    message: string
+}
+author: {
+    login: string
+} | null
+}
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const repoURI = searchParams.get("url");
-    if(!repoURI) {
-        return Response.json(
-            { error: "Missing 'url' query parameter" },
-            { status: 400 });
-    }
+
+  if (!repoURI) {
+    return Response.json({
+      timeline: [],
+      contributors: [],
+      commits: [],
+      error: "Missing repo URL"
+    }, { status: 400 })
+  }
+
     const parts = repoURI.split("/");
 
-    const owner = parts[parts.length - 2];
-    const repo = parts[parts.length - 1];
+    const owner = parts[3]
+    const repo = parts[4]
+
 
     if (!owner || !repo) {
-        return Response.json(
-            { error: "Invalid GitHub repository URL" },
-            { status: 400 });
+        // Invalid URL format response improved 
+        return Response.json({
+        timeline: [],
+        contributors: [],
+        commits: [],
+        error: "Invalid GitHub URL"
+        }, { status: 400 })
     }
 
     try {
-        const githubRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=100`);
+        //improved fetch 
+        const githubRes = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/commits?per_page=100`,
+        {
+            headers: {
+            "Accept": "application/vnd.github+json"
+            }
+        }
+        )
+        
+        if (!githubRes.ok) {
+        return Response.json({
+            timeline: [],
+            contributors: [],
+            commits: [],
+            error: "GitHub API error"
+        }, { status: githubRes.status })
+        }
 
         const data= await githubRes.json();
 
-        if(!githubRes.ok) {
-            return Response.json(
-                { error: "Failed to fetch repository commits" },
-                { status: githubRes.status });
-            }
 
-        type RawCommit = {
-        commit: {
-            author: {
-            date: string
-            }
-            message: string
-        }
-        author: {
-            login: string
-        } | null
+        if (data.message?.includes("rate limit")) {
+        
+        return Response.json({
+            timeline: [],
+            contributors: [],
+            commits: [],
+            error: "Rate limit exceeded"
+        }, { status: 429 })
         }
 
         const commits = (data as RawCommit[]).map((c) => ({
@@ -45,6 +76,16 @@ export async function GET(req: Request) {
         author: c.author?.login || "unknown",
         message: c.commit.message,
         }))
+
+        // If no commits found response improved
+        if (!commits.length) {
+        return Response.json({
+            timeline: [],
+            contributors: [],
+            commits: [],
+            error: "No commits found"
+        })
+        }
 
         //Goal
         // Transform:
@@ -87,15 +128,20 @@ export async function GET(req: Request) {
         const sortedContributors = [...contributors].sort(
         (a, b) => b.commits - a.commits
         );
+
+        //success response
         return Response.json({
             timeline,
             contributes: sortedContributors,
             commits
         });
         
-    } catch (error) {
-        return Response.json(
-            { error: "Failed to fetch repository commits" },
-            { status: 500 });
-    }
+    } catch (err) {
+    return Response.json({
+      timeline: [],
+      contributors: [],
+      commits: [],
+      error: "Internal server error"
+    }, { status: 500 })
+  }
 }
