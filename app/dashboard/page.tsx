@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import { TimelineChart } from "@/components/dashboard/timeline-chart"
 import { ContributorsChart } from "@/components/dashboard/contributors-chart"
@@ -5,7 +7,39 @@ import { CommitList } from "@/components/dashboard/commit-list"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Github, GitBranch, Users, GitCommit } from "lucide-react"
 
+import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
+
+
+
 export default function Dashboard() {
+    const searchParams = useSearchParams()
+    const repoUrl = searchParams.get("url")
+
+    const [data, setData] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    //fetch data when repoUrl changes
+    useEffect(() => {
+    if (!repoUrl) return
+
+    fetch(`/api/repo?url=${encodeURIComponent(repoUrl)}`)
+      .then(res => res.json())
+      .then((res) => {
+        setData(res)
+        setLoading(false)
+      })
+  }, [repoUrl])
+
+
+  if (loading) {
+    return <div className="p-6">Analyzing repository...</div>
+  }
+
+  if (data?.error) {
+    return <div className="p-6 text-red-500">{data.error}</div>
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-sm">
@@ -22,7 +56,9 @@ export default function Dashboard() {
                 <Github className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <h1 className="font-semibold text-foreground">vercel/next.js</h1>
+              <h1 className="font-semibold text-foreground">
+                {repoUrl?.split("/").slice(3,5).join("/") || "Repository"}
+              </h1>
                 <p className="text-sm text-muted-foreground">Repository Analysis</p>
               </div>
             </div>
@@ -35,24 +71,24 @@ export default function Dashboard() {
           <StatCard
             icon={<GitCommit className="h-5 w-5" />}
             label="Total Commits"
-            value="530"
+            value={data.commits.length.toString()}
           />
           <StatCard
             icon={<Users className="h-5 w-5" />}
             label="Contributors"
-            value="5"
+            value={data.contributors.length.toString()}
           />
-          <StatCard
+          {/* <StatCard
             icon={<GitBranch className="h-5 w-5" />}
             label="Branches"
             value="12"
-          />
+          /> */}
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <TimelineChart />
-          <ContributorsChart />
-          <CommitList />
+          <TimelineChart data={data.timeline} />
+          <ContributorsChart data={data.contributors} />
+          <CommitList data={data.commits} />
         </div>
       </main>
     </div>

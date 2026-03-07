@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { commitsData } from "@/lib/mock-data"
 import { GitCommit, User, Calendar } from "lucide-react"
 
-export function CommitList() {
+export function CommitList({data}: {data: any[]}) {
   return (
     <Card className="col-span-full bg-card border-border">
       <CardHeader>
@@ -14,7 +14,7 @@ export function CommitList() {
       <CardContent>
         <ScrollArea className="h-[400px] pr-4">
           <div className="space-y-4">
-            {commitsData.map((commit, index) => (
+            {data.map((commit, index) => (
               <div
                 key={index}
                 className="flex items-start gap-4 rounded-lg border border-border bg-secondary/30 p-4 transition-colors hover:bg-secondary/50"

@@ -12,8 +12,8 @@ import {
 } from "recharts"
 import { timelineData } from "@/lib/mock-data"
 
-export function TimelineChart() {
-  return (
+export function TimelineChart({ data }: { data: any[] }) {
+    return (
     <Card className="col-span-2 bg-card border-border">
       <CardHeader>
         <CardTitle className="text-foreground">Commit Timeline</CardTitle>
@@ -21,7 +21,7 @@ export function TimelineChart() {
       <CardContent>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={timelineData}>
+            <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.5} />
               <XAxis
                 dataKey="date"
