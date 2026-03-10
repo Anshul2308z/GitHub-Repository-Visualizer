@@ -1,5 +1,6 @@
-import { fetchCommits } from "./lib/github"
-import { normalizeCommits, buildTimeline, buildContributors } from "./lib/process"
+import { fetchCommits, fetchPRs } from "./lib/github"
+import { normalizeCommits, buildTimeline, buildContributors, buildPRContributors } from "./lib/process"
+
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -10,6 +11,7 @@ export async function GET(req: Request) {
       timeline: [],
       contributors: [],
       commits: [],
+      prs: [],
       error: "Missing repo URL"
     }, { status: 400 })
   }
@@ -23,6 +25,7 @@ export async function GET(req: Request) {
       timeline: [],
       contributors: [],
       commits: [],
+      prs:[],
       error: "Invalid GitHub URL"
     }, { status: 400 })
   }
@@ -37,6 +40,7 @@ export async function GET(req: Request) {
         timeline: [],
         contributors: [],
         commits: [],
+        prs: [],
         error: "No commits found"
       })
     }
@@ -44,10 +48,14 @@ export async function GET(req: Request) {
     const timeline = buildTimeline(commits)
     const contributors = buildContributors(commits)
 
+    const prRaw = await fetchPRs(owner, repo)
+    const prs = buildPRContributors(prRaw)
+
     return Response.json({
       timeline,
       contributors,
-      commits
+      commits,
+      prs
     })
 
   } catch (err: any) {
@@ -56,6 +64,7 @@ export async function GET(req: Request) {
         timeline: [],
         contributors: [],
         commits: [],
+        prs:[],
         error: "Rate limit exceeded"
       }, { status: 429 })
     }
@@ -64,6 +73,7 @@ export async function GET(req: Request) {
       timeline: [],
       contributors: [],
       commits: [],
+      prs: [],
       error: "Internal server error"
     }, { status: 500 })
   }
