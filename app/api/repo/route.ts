@@ -1,8 +1,16 @@
-import { fetchCommits, fetchPRs } from "./lib/github"
-import { normalizeCommits, buildTimeline, buildContributors, buildPRContributors } from "./lib/process"
+import { fetchCommits, fetchPRs, fetchIssues } from "./lib/github"
+import { normalizeCommits, buildTimeline, buildContributors, buildPRContributors, buildIssueContributors } from "./lib/process"
 
+type ResponseData = {
+    timeline: { date: string; commits: number }[]
+    contributors: { name: string; commits: number }[]
+    commits: { date: string; author: string; message: string }[]
+    prs: { name: string; prs: number }[]
+    issues: { name: string; issues: number }[]
+    error?: string
+}
 
-export async function GET(req: Request) {
+export async function GET(req: Request): Promise<Response> {
   const { searchParams } = new URL(req.url)
   const repoURI = searchParams.get("url")
 
@@ -12,6 +20,7 @@ export async function GET(req: Request) {
       contributors: [],
       commits: [],
       prs: [],
+      issues: [],
       error: "Missing repo URL"
     }, { status: 400 })
   }
@@ -26,6 +35,7 @@ export async function GET(req: Request) {
       contributors: [],
       commits: [],
       prs:[],
+      issues: [],
       error: "Invalid GitHub URL"
     }, { status: 400 })
   }
@@ -41,6 +51,7 @@ export async function GET(req: Request) {
         contributors: [],
         commits: [],
         prs: [],
+        issues: [],
         error: "No commits found"
       })
     }
@@ -51,11 +62,15 @@ export async function GET(req: Request) {
     const prRaw = await fetchPRs(owner, repo)
     const prs = buildPRContributors(prRaw)
 
+    const issuesRaw = await fetchIssues(owner, repo)
+    const issues = buildIssueContributors(issuesRaw)
+
     return Response.json({
       timeline,
       contributors,
       commits,
-      prs
+      prs,
+      issues,
     })
 
   } catch (err: any) {
@@ -65,6 +80,7 @@ export async function GET(req: Request) {
         contributors: [],
         commits: [],
         prs:[],
+        issues: [],
         error: "Rate limit exceeded"
       }, { status: 429 })
     }
@@ -74,6 +90,7 @@ export async function GET(req: Request) {
       contributors: [],
       commits: [],
       prs: [],
+      issues: [], 
       error: "Internal server error"
     }, { status: 500 })
   }
