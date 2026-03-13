@@ -1,5 +1,8 @@
+import { totalmem } from "os";
 import { fetchCommits, fetchPRs, fetchIssues, fetchBranches } from "./lib/github"
-import { normalizeCommits, buildTimeline, buildContributors, buildPRContributors, buildIssueContributors } from "./lib/process"
+import { normalizeCommits, buildTimeline,
+     buildContributors, buildPRContributors,
+      buildIssueContributors, buildStats } from "./lib/process"
 
 type ResponseData = {
     timeline: { date: string; commits: number }[]
@@ -8,6 +11,14 @@ type ResponseData = {
     prs: { name: string; prs: number }[]
     issues: { name: string; issues: number }[]
     branches: string[]
+    stats: {
+        totalCommits: number
+        activeDays: number
+        totalPRs: number
+        totalIssues: number
+        busFactor: number
+        totalContributors: number
+    }
     error?: string
 }
 
@@ -25,6 +36,14 @@ export async function GET(req: Request): Promise<Response> {
       prs: [],
       issues: [],
       branches:[],
+      stats: {
+        totalCommits: 0,
+        activeDays: 0,
+        totalPRs: 0,
+        totalIssues: 0,
+        busFactor: 0,
+        totalContributors: 0
+      },
       error: "Missing repo URL"
     }, { status: 400 })
   }
@@ -41,6 +60,14 @@ export async function GET(req: Request): Promise<Response> {
       prs:[],
       issues: [],
       branches: [],
+      stats: {
+        totalCommits: 0,
+        activeDays: 0,
+        totalPRs: 0,
+        totalIssues: 0,
+        busFactor: 0,
+        totalContributors: 0
+      },
       error: "Invalid GitHub URL"
     }, { status: 400 })
   }
@@ -58,6 +85,14 @@ export async function GET(req: Request): Promise<Response> {
         prs: [],
         issues: [],
         branches: [],
+        stats: {
+          totalCommits: 0,
+          activeDays: 0,
+          totalPRs: 0,
+          totalIssues: 0,
+          busFactor: 0,
+          totalContributors: 0
+        },
         error: "No commits found"
       })
     }
@@ -74,13 +109,21 @@ export async function GET(req: Request): Promise<Response> {
     const branchesNew = await fetchBranches(owner, repo)
     const branches = branchesNew.map((b: any) => b.name)
 
+    const stats = buildStats(
+                    commits,
+                    contributors,
+                    prs,
+                    issues
+                    )
+
     return Response.json({
       timeline,
       contributors,
       commits,
       prs,
       issues,
-      branches
+      branches,
+      stats   
     })
 
   } catch (err: any) {
@@ -92,6 +135,15 @@ export async function GET(req: Request): Promise<Response> {
         prs:[],
         issues: [],
         branches: [],
+        stats: {
+          totalCommits: 0,
+          activeDays: 0,
+          totalPRs: 0,
+          totalIssues: 0,
+          busFactor: 0,
+          totalContributors: 0
+
+        },
         error: "Rate limit exceeded"
       }, { status: 429 })
     }
@@ -103,6 +155,16 @@ export async function GET(req: Request): Promise<Response> {
       prs: [],
       issues: [], 
       branches: [],
+      stats: {
+        totalCommits: 0,
+        activeDays: 0,
+        totalPRs: 0,
+        totalIssues: 0,
+        busFactor: 0,
+        totalContributors: 0
+
+      },
+
       error: "Internal server error"
     }, { status: 500 })
   }

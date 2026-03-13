@@ -24,6 +24,8 @@ export default function Dashboard() {
     useEffect(() => {
     if (!repoUrl) return
 
+    setLoading(true)
+
     fetch(`/api/repo?url=${encodeURIComponent(repoUrl)}&branch=${encodeURIComponent(branch || "main")}`)
       .then(res => res.json())
       .then((res) => {
@@ -60,6 +62,9 @@ export default function Dashboard() {
               <h1 className="font-semibold text-foreground">
                 {repoUrl?.split("/").slice(3,5).join("/") || "Repository"}
               </h1>
+              <p className="text-xs text-muted-foreground">
+                Branch: {branch || "main"}
+              </p>
                 <p className="text-sm text-muted-foreground">Repository Analysis</p>
               </div>
             </div>
@@ -68,28 +73,40 @@ export default function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <StatCard
-            icon={<GitCommit className="h-5 w-5" />}
-            label="Total Commits"
-            value={data.commits.length.toString()}
-          />
-          <StatCard
-            icon={<Users className="h-5 w-5" />}
-            label="Contributors"
-            value={data.contributors.length.toString()}
-          />
-          {/* <StatCard
-            icon={<GitBranch className="h-5 w-5" />}
-            label="Branches"
-            value="12"
-          /> */}
-        </div>
+
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <StatCard
+        icon={<GitCommit className="h-5 w-5" />}
+        label="Total Commits"
+        value={data.stats.totalCommits.toString()}
+      />
+      <StatCard
+        icon={<Users className="h-5 w-5" />}
+        label="Active Days"
+        value={data.stats.activeDays.toString()}
+      />
+      <StatCard
+        icon={<GitBranch className="h-5 w-5" />}
+        label="Bus Factor"
+        value={(data.stats.busFactor * 100).toFixed(0) + "%"}
+      />
+      <StatCard
+        icon={<GitCommit />}
+        label="PRs"
+        value={data.stats.totalPRs.toString()}
+      />
+
+      <StatCard
+        icon={<Users />}
+        label="Issues"
+        value={data.stats.totalIssues.toString()}
+      />
+      </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <TimelineChart data={data.timeline} />
-          <ContributorsChart data={data.contributors} />
-          <CommitList data={data.commits} />
+          <TimelineChart data={data?.timeline} />
+          <ContributorsChart data={data?.contributors} />
+          <CommitList data={data?.commits} />
         </div>
       </main>
     </div>

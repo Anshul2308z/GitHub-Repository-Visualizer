@@ -39,36 +39,45 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Input
-              type="url"
-              placeholder="https://github.com/owner/repo"
-              value={repoUrl}
-              onChange={(e) => setRepoUrl(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="h-12 flex-1 bg-card border-border text-foreground placeholder:text-muted-foreground"
-            />
-            <Input
-              type="text"
-              placeholder="Branch"
-              value={branch}
-              onChange={(e) => setBranch(e.target.value)}
-              className="h-12 flex-1 bg-card border-border text-foreground placeholder:text-muted-foreground"
-            />
-            <Button 
-              onClick={handleAnalyze}
-              size="lg"
-              className="h-12 gap-2 bg-foreground text-background hover:bg-foreground/90"
-            >
-              Analyze
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Enter a public GitHub repository URL to get started
-          </p>
-        </div>
+        <div className="space-y-3">
+  {/* Row 1: Repo URL full width */}
+  <Input
+    type="url"
+    placeholder="https://github.com/owner/repo"
+    value={repoUrl}
+    onChange={(e) => setRepoUrl(e.target.value)}
+    onKeyDown={handleKeyDown}
+    className="h-12 w-full bg-card border-border text-foreground placeholder:text-muted-foreground"
+  />
+
+  {/* Row 2: Branch + Button */}
+  <div className="grid grid-cols-5 gap-3">
+    {/* 60% */}
+    <div className="col-span-3 flex items-center gap-2">
+      <span className="text-sm text-foreground whitespace-nowrap">
+        branch:
+      </span>
+
+      <Input
+        type="text"
+        placeholder="main"
+        value={branch}
+        onChange={(e) => setBranch(e.target.value)}
+        className="h-12 flex-1 bg-card border-border text-foreground placeholder:text-muted-foreground"
+      />
+    </div>
+
+    {/* 40% */}
+    <Button
+      onClick={handleAnalyze}
+      size="lg"
+      className="col-span-2 h-12 gap-2 bg-foreground text-background hover:bg-foreground/90"
+    >
+      Analyze
+      <ArrowRight className="h-4 w-4" />
+    </Button>
+  </div>
+</div>
       </div>
     </main>
   )
