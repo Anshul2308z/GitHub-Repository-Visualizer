@@ -4,24 +4,6 @@ import { normalizeCommits, buildTimeline,
      buildContributors, buildPRContributors,
       buildIssueContributors, buildStats } from "./lib/process"
 
-type ResponseData = {
-    timeline: { date: string; commits: number }[]
-    contributors: { name: string; commits: number }[]
-    commits: { date: string; author: string; message: string }[]
-    prs: { name: string; prs: number }[]
-    issues: { name: string; issues: number }[]
-    branches: string[]
-    stats: {
-        totalCommits: number
-        activeDays: number
-        totalPRs: number
-        totalIssues: number
-        busFactor: number
-        totalContributors: number
-    }
-    error?: string
-}
-
 export async function GET(req: Request): Promise<Response> {
   const { searchParams } = new URL(req.url)
   const repoURI = searchParams.get("url")
@@ -123,7 +105,7 @@ export async function GET(req: Request): Promise<Response> {
       prs,
       issues,
       branches,
-      stats   
+      stats
     })
 
   } catch (err: any) {
