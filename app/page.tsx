@@ -11,8 +11,9 @@ export default function Home() {
   const router = useRouter()
 
   const handleAnalyze = () => {
-    if (repoUrl.trim()) {
-      router.push("/dashboard")
+    const trimmedUrl = repoUrl.trim();
+    if (trimmedUrl) {
+      router.push(`/dashboard?url=${encodeURIComponent(trimmedUrl)}`)    
     }
   }
 

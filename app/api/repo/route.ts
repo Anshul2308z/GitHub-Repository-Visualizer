@@ -109,17 +109,17 @@ export async function GET(req: Request) {
         commits
         }));
 
-        //contributers logic 
-        const contributerMap : Record<string,number> = {};
+        //contributors logic 
+        const contributorMap : Record<string,number> = {};
 
         for(const c of commits){
-            if(!contributerMap[c.author]){
-                contributerMap[c.author] = 0;
+            if(!contributorMap[c.author]){
+                contributorMap[c.author] = 0;
             }
-            contributerMap[c.author]++;
+            contributorMap[c.author]++;
         }
 
-        const contributors = Object.entries(contributerMap).map(([name, commits])=>(
+        const contributors = Object.entries(contributorMap).map(([name, commits])=>(
             {
                 name,
                 commits
@@ -132,7 +132,7 @@ export async function GET(req: Request) {
         //success response
         return Response.json({
             timeline,
-            contributes: sortedContributors,
+            contributors: sortedContributors,
             commits
         });
         

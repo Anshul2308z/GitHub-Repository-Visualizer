@@ -12,7 +12,7 @@ import {
 } from "recharts"
 import { contributorsData } from "@/lib/mock-data"
 
-export function ContributorsChart() {
+export function ContributorsChart({data}: {data: any[]}) {
   return (
     <Card className="bg-card border-border">
       <CardHeader>
@@ -21,7 +21,7 @@ export function ContributorsChart() {
       <CardContent>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={contributorsData} layout="vertical">
+            <BarChart data={data} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.5} horizontal={false} />
               <XAxis
                 type="number"
