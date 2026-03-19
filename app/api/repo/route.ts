@@ -46,9 +46,53 @@ export async function GET(req: Request) {
         message: c.commit.message,
         }))
 
+        //Goal
+        // Transform:
+        // Commit[]
+        // into:
+        // timeline + contributors
 
-        return Response.json({ commits });
+        //timeline logic
+        const timelineMap : Record<string,number> = {};
 
+        for( const c of commits ){
+            const date = c.date.split("T")[0]; //YYYY-MM-DD
+            if(!timelineMap[date]){
+                timelineMap[date] = 0;
+            }
+            timelineMap[date]++;
+        }
+
+        const timeline = Object.entries(timelineMap).map(([date, commits]) => ({
+        date,
+        commits
+        }));
+
+        //contributers logic 
+        const contributerMap : Record<string,number> = {};
+
+        for(const c of commits){
+            if(!contributerMap[c.author]){
+                contributerMap[c.author] = 0;
+            }
+            contributerMap[c.author]++;
+        }
+
+        const contributors = Object.entries(contributerMap).map(([name, commits])=>(
+            {
+                name,
+                commits
+            }
+        ));
+        const sortedContributors = [...contributors].sort(
+        (a, b) => b.commits - a.commits
+        );
+        return Response.json({
+            timeline,
+            contributes: sortedContributors,
+            commits
+        });
+        
     } catch (error) {
         return Response.json(
             { error: "Failed to fetch repository commits" },
