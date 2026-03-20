@@ -56,3 +56,19 @@ export function buildPRContributors(prs: any[]) {
     .map(([name, prs]) => ({ name, prs }))
     .sort((a, b) => b.prs - a.prs)
 }
+
+export function buildIssueContributors(issues: any[]) {
+  const map: Record<string, number> = {}
+
+  for (const issue of issues) {
+    //  FILTER OUT PRs
+    if (issue.pull_request) continue
+
+    const author = issue.user?.login || "unknown"
+    map[author] = (map[author] || 0) + 1
+  }
+
+  return Object.entries(map)
+    .map(([name, issues]) => ({ name, issues }))
+    .sort((a, b) => b.issues - a.issues)
+}
