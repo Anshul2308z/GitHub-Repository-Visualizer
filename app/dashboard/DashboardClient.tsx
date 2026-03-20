@@ -15,6 +15,7 @@ import { useSearchParams } from "next/navigation"
 export default function Dashboard() {
     const searchParams = useSearchParams()
     const repoUrl = searchParams.get("url")
+    const branch = searchParams.get("branch")
 
     const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
@@ -23,13 +24,13 @@ export default function Dashboard() {
     useEffect(() => {
     if (!repoUrl) return
 
-    fetch(`/api/repo?url=${encodeURIComponent(repoUrl)}`)
+    fetch(`/api/repo?url=${encodeURIComponent(repoUrl)}&branch=${encodeURIComponent(branch || "main")}`)
       .then(res => res.json())
       .then((res) => {
         setData(res)
         setLoading(false)
       })
-  }, [repoUrl])
+  }, [repoUrl, branch])
 
 
   if (loading) {

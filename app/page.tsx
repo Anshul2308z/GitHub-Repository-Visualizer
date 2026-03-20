@@ -8,12 +8,13 @@ import { Github, ArrowRight } from "lucide-react"
 
 export default function Home() {
   const [repoUrl, setRepoUrl] = useState("")
+  const [branch, setBranch] = useState("main")
   const router = useRouter()
 
   const handleAnalyze = () => {
     const trimmedUrl = repoUrl.trim();
     if (trimmedUrl) {
-      router.push(`/dashboard?url=${encodeURIComponent(trimmedUrl)}`)    
+      router.push(`/dashboard?url=${encodeURIComponent(trimmedUrl)}&branch=${encodeURIComponent(branch)}`)
     }
   }
 
@@ -46,6 +47,13 @@ export default function Home() {
               value={repoUrl}
               onChange={(e) => setRepoUrl(e.target.value)}
               onKeyDown={handleKeyDown}
+              className="h-12 flex-1 bg-card border-border text-foreground placeholder:text-muted-foreground"
+            />
+            <Input
+              type="text"
+              placeholder="Branch"
+              value={branch}
+              onChange={(e) => setBranch(e.target.value)}
               className="h-12 flex-1 bg-card border-border text-foreground placeholder:text-muted-foreground"
             />
             <Button 
