@@ -72,3 +72,37 @@ export function buildIssueContributors(issues: any[]) {
     .map(([name, issues]) => ({ name, issues }))
     .sort((a, b) => b.issues - a.issues)
 }
+
+export function buildStats(
+  commits: any[],
+  contributors: any[],
+  prs: any[],
+  issues: any[]
+) {
+  const totalCommits = commits.length
+
+  // active days
+  const uniqueDays = new Set(
+    commits.map(c => c.date.split("T")[0])
+  )
+  const activeDays = uniqueDays.size
+
+  // bus factor (top contributor share)
+  const topCommits = contributors[0]?.commits || 0
+  const busFactor = totalCommits
+    ? Number((topCommits / totalCommits).toFixed(2))
+    : 0
+
+  const totalPRs = prs.reduce((sum, p) => sum + p.prs, 0)
+  const totalIssues = issues.reduce((sum, i) => sum + i.issues, 0)
+  const totalContributors = contributors.length
+
+  return {
+    totalCommits,
+    activeDays,
+    busFactor,
+    totalPRs,
+    totalIssues,
+    totalContributors
+  }
+}
