@@ -43,3 +43,16 @@ export function buildContributors(commits: any[]) {
     .map(([name, commits]) => ({ name, commits }))
     .sort((a, b) => b.commits - a.commits)
 }
+
+export function buildPRContributors(prs: any[]) {
+  const map: Record<string, number> = {}
+
+  for (const pr of prs) {
+    const author = pr.user?.login || "unknown"
+    map[author] = (map[author] || 0) + 1
+  }
+
+  return Object.entries(map)
+    .map(([name, prs]) => ({ name, prs }))
+    .sort((a, b) => b.prs - a.prs)
+}
