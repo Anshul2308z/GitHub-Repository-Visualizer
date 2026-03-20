@@ -1,17 +1,9 @@
-type RawCommit = {
-commit: {
-    author: {
-    date: string
-    }
-    message: string
-}
-author: {
-    login: string
-} | null
-}
+import { fetchCommits } from "./lib/github"
+import { normalizeCommits, buildTimeline, buildContributors } from "./lib/process"
+
 export async function GET(req: Request) {
-    const { searchParams } = new URL(req.url);
-    const repoURI = searchParams.get("url");
+  const { searchParams } = new URL(req.url)
+  const repoURI = searchParams.get("url")
 
   if (!repoURI) {
     return Response.json({
@@ -22,121 +14,52 @@ export async function GET(req: Request) {
     }, { status: 400 })
   }
 
-    const parts = repoURI.split("/");
+  const parts = repoURI.split("/")
+  const owner = parts[3]
+  const repo = parts[4]
 
-    const owner = parts[3]
-    const repo = parts[4]
+  if (!owner || !repo) {
+    return Response.json({
+      timeline: [],
+      contributors: [],
+      commits: [],
+      error: "Invalid GitHub URL"
+    }, { status: 400 })
+  }
 
+  try {
+    const raw = await fetchCommits(owner, repo)
 
-    if (!owner || !repo) {
-        // Invalid URL format response improved 
-        return Response.json({
+    const commits = normalizeCommits(raw)
+
+    if (!commits.length) {
+      return Response.json({
         timeline: [],
         contributors: [],
         commits: [],
-        error: "Invalid GitHub URL"
-        }, { status: 400 })
+        error: "No commits found"
+      })
     }
 
-    try {
-        //improved fetch 
-        const githubRes = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/commits?per_page=100`,
-        {
-            headers: {
-            "Accept": "application/vnd.github+json"
-            }
-        }
-        )
-        
-        if (!githubRes.ok) {
-        return Response.json({
-            timeline: [],
-            contributors: [],
-            commits: [],
-            error: "GitHub API error"
-        }, { status: githubRes.status })
-        }
+    const timeline = buildTimeline(commits)
+    const contributors = buildContributors(commits)
 
-        const data= await githubRes.json();
+    return Response.json({
+      timeline,
+      contributors,
+      commits
+    })
 
+  } catch (err: any) {
+    if (err.message === "RATE_LIMIT") {
+      return Response.json({
+        timeline: [],
+        contributors: [],
+        commits: [],
+        error: "Rate limit exceeded"
+      }, { status: 429 })
+    }
 
-        if (data.message?.includes("rate limit")) {
-        
-        return Response.json({
-            timeline: [],
-            contributors: [],
-            commits: [],
-            error: "Rate limit exceeded"
-        }, { status: 429 })
-        }
-
-        const commits = (data as RawCommit[]).map((c) => ({
-        date: c.commit.author.date,
-        author: c.author?.login || "unknown",
-        message: c.commit.message,
-        }))
-
-        // If no commits found response improved
-        if (!commits.length) {
-        return Response.json({
-            timeline: [],
-            contributors: [],
-            commits: [],
-            error: "No commits found"
-        })
-        }
-
-        //Goal
-        // Transform:
-        // Commit[]
-        // into:
-        // timeline + contributors
-
-        //timeline logic
-        const timelineMap : Record<string,number> = {};
-
-        for( const c of commits ){
-            const date = c.date.split("T")[0]; //YYYY-MM-DD
-            if(!timelineMap[date]){
-                timelineMap[date] = 0;
-            }
-            timelineMap[date]++;
-        }
-
-        const timeline = Object.entries(timelineMap).map(([date, commits]) => ({
-        date,
-        commits
-        }));
-
-        //contributors logic 
-        const contributorMap : Record<string,number> = {};
-
-        for(const c of commits){
-            if(!contributorMap[c.author]){
-                contributorMap[c.author] = 0;
-            }
-            contributorMap[c.author]++;
-        }
-
-        const contributors = Object.entries(contributorMap).map(([name, commits])=>(
-            {
-                name,
-                commits
-            }
-        ));
-        const sortedContributors = [...contributors].sort(
-        (a, b) => b.commits - a.commits
-        );
-
-        //success response
-        return Response.json({
-            timeline,
-            contributors: sortedContributors,
-            commits
-        });
-        
-    } catch (err) {
     return Response.json({
       timeline: [],
       contributors: [],
