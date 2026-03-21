@@ -38,9 +38,34 @@ export default function Dashboard() {
 
 
   if (loading) {
-    return <div className="p-6">Analyzing repository...</div>
-  }
+    return (
+      <div className="min-h-screen bg-background">
+        <main className="mx-auto max-w-7xl px-6 py-8 space-y-6">
 
+          {/* Stat cards skeleton */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="h-24 rounded-xl border border-border bg-card animate-pulse"
+              />
+            ))}
+          </div>
+
+          {/* Charts skeleton */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="h-80 rounded-xl border border-border bg-card animate-pulse"
+              />
+            ))}
+          </div>
+
+        </main>
+      </div>
+    )
+  }
   if (data?.error) {
     return <div className="p-6 text-red-500">{data.error}</div>
   }
