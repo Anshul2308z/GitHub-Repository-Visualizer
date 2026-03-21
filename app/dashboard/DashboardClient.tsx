@@ -20,6 +20,8 @@ export default function Dashboard() {
     const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
+    const [metric, setMetric] = useState<"commits" | "prs" | "issues">("commits");
+
     //fetch data when repoUrl changes
     useEffect(() => {
     if (!repoUrl) return
@@ -42,6 +44,25 @@ export default function Dashboard() {
   if (data?.error) {
     return <div className="p-6 text-red-500">{data.error}</div>
   }
+
+  const contributorData = (() => {
+  if (!data) return []
+
+  switch (metric) {
+    case "prs":
+      return data.prs.map((p: any) => ({
+        name: p.name,
+        commits: p.prs, // reuse key for chart
+      }))
+    case "issues":
+      return data.issues.map((i: any) => ({
+        name: i.name,
+        commits: i.issues,
+      }))
+    default:
+      return data.contributors
+  }
+})()
 
   return (
     <div className="min-h-screen bg-background">
@@ -105,7 +126,29 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <TimelineChart data={data?.timeline} />
-          <ContributorsChart data={data?.contributors} />
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground">
+                Top Contributors
+              </h2>
+
+              <div className="flex gap-2">
+                {["commits", "prs", "issues"].map((m) => (
+                  <Button
+                    key={m}
+                    size="sm"
+                    variant={metric === m ? "default" : "ghost"}
+                    onClick={() => setMetric(m as any)}
+                    className="capitalize"
+                  >
+                    {m}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <ContributorsChart data={contributorData} />
+          </div>
           <CommitList data={data?.commits} />
         </div>
       </main>
