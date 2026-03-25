@@ -13,8 +13,8 @@ Thanks for your interest in contributing 🚀
 ```bash
 git clone https://github.com/Anshul2308z/GitHub-Repository-Visualizer
 cd GitHub-Repository-Visualizer
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 ## 🌱 Create a Branch
