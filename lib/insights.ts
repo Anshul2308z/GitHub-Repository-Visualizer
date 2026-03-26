@@ -1,20 +1,58 @@
 import { Insight, ResponseData } from "../app/api/repo/lib/types"
 
+function getMomentum(timeline: ResponseData["timeline"]) {
+  if (!timeline || timeline.length < 14) return 0
+
+  const last14 = timeline.slice(-14)
+
+  const recent = last14
+    .slice(-7)
+    .reduce((sum, d) => sum + d.commits, 0)
+
+  const previous = last14
+    .slice(0, 7)
+    .reduce((sum, d) => sum + d.commits, 0)
+
+  return previous === 0 ? 0 : (recent - previous) / previous
+}
+
+function getTopContributor(contributors: ResponseData["contributors"]) {
+  if (!contributors || contributors.length === 0) return null
+
+  return contributors.reduce((max, curr) =>
+    curr.commits > max.commits ? curr : max
+  )
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export function computeInsights(data: ResponseData): Insight[] {
   if (!data) return []
 
   const insights: Insight[] = []
 
-// we will push insights one by one here
+  // we will push insights one by one here
     // Contributor Dominance
     const totalCommits = data.stats.totalCommits || 1
 
-    const sortedContributors = [...data.contributors].sort(
-    (a, b) => b.commits - a.commits
-    )
+    const topContributor = getTopContributor(data.contributors) 
 
-    const topContributor = sortedContributors[0]
     const dominance = topContributor ? topContributor.commits / totalCommits : 0
 
     let dominanceStatus: "good" | "warning" | "bad" = "good"
@@ -37,7 +75,10 @@ export function computeInsights(data: ResponseData): Insight[] {
     let lastCommitDays = 999
 
     if (commits.length > 0) {
-    const latest = new Date(commits[0].date).getTime()
+    const latest = commits.reduce((max, c) => {
+    const time = new Date(c.date).getTime()
+    return time > max ? time : max
+    }, 0)
     const now = Date.now()
 
     lastCommitDays = Math.floor((now - latest) / (1000 * 60 * 60 * 24))
@@ -82,16 +123,7 @@ export function computeInsights(data: ResponseData): Insight[] {
     //Activity trend
     const timeline = data.timeline || []
 
-    let trend = 0
-
-    if (timeline.length >= 14) {
-    const recent = timeline.slice(-7).reduce((sum, d) => sum + d.commits, 0)
-    const previous = timeline
-        .slice(-14, -7)
-        .reduce((sum, d) => sum + d.commits, 0)
-
-    trend = previous === 0 ? 0 : (recent - previous) / previous
-    }
+    const trend = getMomentum(timeline) 
 
     let trendStatus: "good" | "warning" | "bad" = "good"
 
@@ -106,4 +138,36 @@ export function computeInsights(data: ResponseData): Insight[] {
     })
 
   return insights
+}
+
+export function calculateHealthScore(data: ResponseData) {
+  const { stats, timeline } = data
+
+  // 1. Risk (invert bus factor)
+  const riskScore = 100 - stats.busFactor
+
+  // 2. Activity
+  const activityScore = Math.min(stats.activeDays / 30, 1) * 100
+
+  // 3. Momentum
+
+  const momentum = getMomentum(timeline)
+
+    let momentumScore = 50
+
+    if (timeline.length >= 14) {
+    momentumScore = Math.max(0, Math.min(100, (momentum + 1) * 50))
+    }
+
+  // 4. Issue handling
+  const issueScore =
+    (stats.totalPRs / (stats.totalIssues + 1)) * 100
+
+  const healthScore =
+    riskScore * 0.35 +
+    activityScore * 0.25 +
+    momentumScore * 0.2 +
+    issueScore * 0.2
+
+  return Math.round(healthScore)
 }

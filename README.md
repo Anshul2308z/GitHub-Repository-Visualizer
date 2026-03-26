@@ -10,7 +10,7 @@
 
 ## 🚀 Live Demo
 
-https://git-hub-repository-visualizer.vercel.app
+https://git-hub-repolens.vercel.app/
 
 ## ✨ Features
 

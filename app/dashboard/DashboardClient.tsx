@@ -12,6 +12,9 @@ import { useSearchParams } from "next/navigation"
 import { InsightCard } from "@/components/dashboard/insight-card"
 import { computeInsights } from "@/lib/insights"
 
+import { calculateHealthScore } from "@/lib/insights"
+import { HelpCircle } from "lucide-react"
+
 
 
 export default function Dashboard() {
@@ -31,6 +34,7 @@ export default function Dashboard() {
           return order[a.status] - order[b.status]
         })
       : []    
+    const healthScore = data ? calculateHealthScore(data) : 0
 
         // For tooltip
   const [hoveredStat, setHoveredStat] = useState<{
@@ -192,6 +196,64 @@ const handleStatCardClick = (sectionId: string) => {
       </header>
 
       <main className="mx-auto max-w-7xl px-6 py-8">
+      
+      
+    <div
+  onClick={() => scrollTo("health-explained")}
+  onMouseEnter={() => {
+  if (isMobile) return
+  setHoveredStat({
+    label: "Health Score",
+    description:
+      "Composite score based on contributor risk, activity, momentum, and issue handling.",
+  })
+}}
+onMouseLeave={() => {
+  if (isMobile) return
+  setHoveredStat(null)
+}}
+  className="
+    mb-8
+    cursor-pointer
+    transition-all duration-200
+    hover:scale-[1.01]
+  "
+  >
+  <div className="rounded-2xl border border-border bg-card p-6 flex items-center justify-between">
+
+    <div>
+      <p className="text-sm text-muted-foreground">
+        Repository Health
+      </p>
+
+      <h2 className="text-4xl font-semibold text-foreground">
+        {healthScore}%
+      </h2>
+
+      <p className="text-xs text-muted-foreground mt-1">
+        Overall repository quality and contribution readiness
+      </p>
+    </div>
+
+    <div
+      className={`text-sm font-medium px-3 py-1 rounded-full ${
+        healthScore > 70
+          ? "bg-green-500/10 text-green-500"
+          : healthScore > 40
+          ? "bg-yellow-500/10 text-yellow-500"
+          : "bg-red-500/10 text-red-500"
+      }`}
+    >
+      {healthScore > 70
+        ? "Healthy"
+        : healthScore > 40
+        ? "Moderate"
+        : "Risky"}
+    </div>
+
+  </div>
+</div>
+
 <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
   <StatCard
@@ -232,7 +294,7 @@ const handleStatCardClick = (sectionId: string) => {
       setHoveredStat({
         label: "Bus Factor",
         description:
-          "How dependent the project is on key contributors. Lower = higher risk.",
+          "Minimum number of contributors whose loss would significantly impact the project. Lower = higher risk.",
       })
     }
     onLeave={() => setHoveredStat(null)}
@@ -344,6 +406,70 @@ const handleStatCardClick = (sectionId: string) => {
             </p>
           </div>
         )}
+<div
+  id="health-explained"
+  className="mt-16 rounded-2xl border border-border bg-card p-6 space-y-6"
+>
+  {/* Header */}
+  <div className="flex items-start gap-4">
+    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted border border-border">
+      <HelpCircle className="h-5 w-5 text-foreground" />
+    </div>
+
+    <div>
+      <h2 className="text-lg font-semibold text-foreground">
+        How Health Score is calculated
+      </h2>
+      <p className="text-sm text-muted-foreground mt-1">
+        A composite metric evaluating repository safety and contribution readiness.
+      </p>
+    </div>
+  </div>
+
+  {/* Divider */}
+  <div className="h-px bg-border" />
+
+  {/* Grid */}
+  <div className="grid gap-4 sm:grid-cols-2">
+
+    <div className="p-4 rounded-lg border border-border bg-background">
+      <p className="text-sm font-medium text-foreground">
+        Contributor Risk
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">
+        Measures how dependent the project is on a small number of contributors.
+      </p>
+    </div>
+
+    <div className="p-4 rounded-lg border border-border bg-background">
+      <p className="text-sm font-medium text-foreground">
+        Activity
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">
+        Based on how frequently commits happen over time.
+      </p>
+    </div>
+
+    <div className="p-4 rounded-lg border border-border bg-background">
+      <p className="text-sm font-medium text-foreground">
+        Momentum
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">
+        Compares recent activity to past activity to detect growth or decline.
+      </p>
+    </div>
+
+    <div className="p-4 rounded-lg border border-border bg-background">
+      <p className="text-sm font-medium text-foreground">
+        Issue Handling
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">
+        Evaluates how effectively issues are addressed relative to contributors.
+      </p>
+    </div>
+
+  </div>
+</div>
       </main>
     </div>
   )
