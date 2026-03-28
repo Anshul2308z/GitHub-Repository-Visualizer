@@ -15,6 +15,9 @@ export default function Home() {
     const trimmedUrl = repoUrl.trim();
     if (trimmedUrl) {
       router.push(`/dashboard?url=${encodeURIComponent(trimmedUrl)}&branch=${encodeURIComponent(branch)}`)
+    }else {
+      router.push(`/mock`)
+
     }
   }
 
@@ -47,9 +50,13 @@ export default function Home() {
   <p className="text-muted-foreground text-lg">
     Analyze activity, contributors, and project health before you contribute
   </p>
+  
+</div>
+<div className="">
+
 </div>
 
-{/* INPUT (your existing) */}
+{/* INPUT  */}
 <div className="space-y-3">
   <Input
     type="url"
@@ -108,7 +115,8 @@ export default function Home() {
 </div>
 
   </div>
-  <div className="mt-16 text-center">
+  <div className="mt-16 text-center p-1">
+
   <a
     href="https://github.com/Anshul2308z/GitHub-Repository-Visualizer"
     target="_blank"

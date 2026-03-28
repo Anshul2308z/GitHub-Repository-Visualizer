@@ -135,8 +135,12 @@ const handleStatCardClick = (sectionId: string) => {
               </div>
               <div>
               <h1 className="font-semibold text-foreground">
-                {repoUrl?.split("/").slice(3,5).join("/") || "Repository"}
+                [example] {repoUrl?.split("/").slice(3,5).join("/") || "Repository"}
+    
               </h1>
+              <p className="text-xs text-white">
+                Because no URL was entered
+              </p>
               <p className="text-xs text-muted-foreground">
                 Branch: {branch || "main"}
               </p>
