@@ -1,5 +1,4 @@
 "use client"
-
 import Link from "next/link"
 import { TimelineChart } from "@/components/dashboard/timeline-chart"
 import { ContributorsChart } from "@/components/dashboard/contributors-chart"
@@ -14,17 +13,13 @@ import { computeInsights } from "@/lib/insights"
 
 import { calculateHealthScore } from "@/lib/insights"
 import { HelpCircle } from "lucide-react"
-import ContributorsHighlightCard from "@/components/ui/contributor-highlight-card"
-
+import { data } from "./mockdata"
 
 
 export default function Dashboard() {
-    const searchParams = useSearchParams()
-    const repoUrl = searchParams.get("url")
-    const branch = searchParams.get("branch")
+    const repoUrl = "https://github.com/user/repo";
+    const branch = "main";
 
-    const [data, setData] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
 
     const statsDetailRef = useRef<HTMLDivElement | null>(null)
     const [metric, setMetric] = useState<"commits" | "prs" | "issues">("commits");
@@ -100,50 +95,6 @@ const handleStatCardClick = (sectionId: string) => {
   window.scrollBy(0, -80)
 }
 
-    //fetch data when repoUrl changes
-    useEffect(() => {
-    if (!repoUrl) return
-
-    setLoading(true)
-
-    fetch(`/api/repo?url=${encodeURIComponent(repoUrl)}&branch=${encodeURIComponent(branch || "main")}`)
-      .then(res => res.json())
-      .then((res) => {
-        setData(res)
-        setLoading(false)
-      })
-  }, [repoUrl, branch])
-
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <main className="mx-auto max-w-7xl px-6 py-8 space-y-6">
-
-          {/* Stat cards skeleton */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className="h-24 rounded-xl border border-border bg-card animate-pulse"
-              />
-            ))}
-          </div>
-
-          {/* Charts skeleton */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="h-80 rounded-xl border border-border bg-card animate-pulse"
-              />
-            ))}
-          </div>
-
-        </main>
-      </div>
-    )
-  }
   if (data?.error) {
     return <div className="p-6 text-red-500">{data.error}</div>
   }
@@ -353,7 +304,6 @@ onMouseLeave={() => {
       ))}
     </div>
 
-
       {/* test */}
       {/* <InsightCard
         insight={{
@@ -363,8 +313,6 @@ onMouseLeave={() => {
           message: "Testing card",
         }}
       /> */}
-
-      <ContributorsHighlightCard contributors={data.contributors} />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <TimelineChart data={data?.timeline} />
