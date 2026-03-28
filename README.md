@@ -1,5 +1,3 @@
-Here’s a **clean, professional, and high-impact README** you can directly use (optimized for GitHub visibility, clarity, and recruiter appeal):
-
 ---
 
 # 🚀 RepoLens
@@ -143,12 +141,3 @@ If you like this project:
 Built to simplify how developers understand repositories — not just code, but **collaboration, consistency, and contribution patterns**.
 
 ---
-
-If you want, I can also:
-
-* Add **badges (stars, forks, license, deploy)**
-* Optimize for **GitHub trending**
-* Add a **killer one-line hook for recruiters**
-* Convert this into a **portfolio project description**
-
-Just tell me 👍
