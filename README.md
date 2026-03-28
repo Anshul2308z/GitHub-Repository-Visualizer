@@ -40,8 +40,8 @@ This tool transforms repository data into **clear, visual insights** so you can:
 ## 🛠️ Installation
 
 ```bash
-git clone https://github.com/Anshul2308z/GitHub-Repository-Visualizer
-cd GitHub-Repository-Visualizer
+git clone https://github.com/Anshul2308z/repolens
+cd repolens
 pnpm install
 pnpm run dev
 ```
