@@ -11,8 +11,8 @@ Thanks for your interest in contributing 🚀
 ## 🛠 Setup
 
 ```bash
-git clone https://github.com/Anshul2308z/GitHub-Repository-Visualizer
-cd GitHub-Repository-Visualizer
+git clone https://github.com/Anshul2308z/repolens
+cd repolens
 pnpm install
 pnpm run dev
 ```
