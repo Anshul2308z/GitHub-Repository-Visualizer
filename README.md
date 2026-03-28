@@ -35,7 +35,7 @@ This tool transforms repository data into **clear, visual insights** so you can:
 * Next.js
 * TypeScript
 * GitHub REST API
-* (add anything else you used)
+* Recharts
 
 ## 🛠️ Installation
 
@@ -75,5 +75,3 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md)
 ## 📄 License
 
 MIT — see [LICENSE](./LICENSE) 
-
-isko badhiya krke de readme
